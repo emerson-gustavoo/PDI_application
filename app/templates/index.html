@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="py-12 md:py-20">
+  <div class="max-w-3xl">
+    <span class="rise rise-1 inline-block font-mono text-xs text-amber border border-amber/40 rounded-full px-3 py-1 mb-6">
+      IA aplicada a carreira em TI
+    </span>
+    <h1 class="rise rise-2 font-display font-extrabold text-4xl md:text-6xl leading-[1.05] text-white">
+      Seu mentor de carreira<br>
+      <span class="text-amber">movido a Inteligencia Artificial.</span>
+    </h1>
+    <p class="rise rise-3 mt-6 text-lg text-zinc-400 max-w-2xl">
+      Conte onde voce esta e onde quer chegar. A IA analisa seu perfil e monta um
+      Plano de Desenvolvimento Individual completo: diagnostico, trilha de estudos,
+      certificacoes recomendadas e cronograma.
+    </p>
+    <div class="rise rise-3 mt-9 flex gap-3 flex-wrap">
+      <a href="/register" class="bg-amber text-ink font-semibold px-6 py-3 rounded-md hover:bg-amber-soft transition">
+        Gerar meu PDI
+      </a>
+      <a href="/login" class="border border-line px-6 py-3 rounded-md hover:border-amber/60 hover:text-white transition">
+        Ja tenho conta
+      </a>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-4 mt-20">
+    {% set cards = [
+      ('01', 'Diagnostico do perfil', 'A IA avalia seus pontos fortes e identifica as lacunas de competencia.'),
+      ('02', 'Trilha personalizada', 'Etapas de estudo com recursos e duracao, calibradas pelo seu tempo disponivel.'),
+      ('03', 'Certificacoes certas', 'Recomendacoes reais e priorizadas para o objetivo que voce definiu.')
+    ] %}
+    {% for n, titulo, desc in cards %}
+    <div class="bg-panel border border-line rounded-xl p-6 hover:border-amber/40 transition">
+      <div class="font-mono text-amber text-sm mb-3">{{ n }}</div>
+      <h3 class="font-display font-semibold text-white text-lg mb-2">{{ titulo }}</h3>
+      <p class="text-sm text-zinc-400">{{ desc }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

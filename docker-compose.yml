@@ -1,0 +1,16 @@
+services:
+  web:
+    build: .
+    container_name: mentorpdi
+    ports:
+      # IP_DA_VM:8000 -> porta 8000 do container
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      # Volume persistente: o banco SQLite mora aqui e sobrevive a restart/rebuild
+      - mentorpdi-data:/data
+    restart: unless-stopped
+
+volumes:
+  mentorpdi-data:

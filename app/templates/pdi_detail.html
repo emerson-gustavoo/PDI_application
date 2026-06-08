@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}{{ pdi.objetivo }} - MentorPDI{% endblock %}
+{% block content %}
+<a href="/dashboard" class="text-sm text-zinc-400 hover:text-amber transition">&larr; Voltar ao painel</a>
+
+<div class="mt-4 mb-8 rise rise-1">
+  <h1 class="font-display font-bold text-3xl text-white">{{ pdi.objetivo }}</h1>
+  <p class="text-zinc-400 mt-1">
+    {{ pdi.cargo_atual }} &rarr; {{ pdi.area_interesse }}
+    <span class="text-zinc-600">&middot;</span>
+    {{ pdi.horas_semanais }}h/semana
+    <span class="text-zinc-600">&middot;</span>
+    <span class="font-mono text-xs">{{ pdi.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+  </p>
+</div>
+
+<!-- Diagnostico -->
+{% if c.diagnostico %}
+<section class="bg-panel border border-line rounded-xl p-6 mb-6 rise rise-1">
+  <h2 class="font-display font-semibold text-amber mb-2">Diagnostico</h2>
+  <p class="text-zinc-300 leading-relaxed">{{ c.diagnostico }}</p>
+</section>
+{% endif %}
+
+<div class="grid md:grid-cols-2 gap-6 mb-6">
+  {% if c.pontos_fortes %}
+  <section class="bg-panel border border-line rounded-xl p-6 rise rise-2">
+    <h2 class="font-display font-semibold text-white mb-3">Pontos fortes</h2>
+    <ul class="space-y-2">
+      {% for p in c.pontos_fortes %}
+      <li class="flex gap-2 text-sm text-zinc-300"><span class="text-emerald-400">+</span> {{ p }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {% if c.gaps %}
+  <section class="bg-panel border border-line rounded-xl p-6 rise rise-2">
+    <h2 class="font-display font-semibold text-white mb-3">Lacunas a desenvolver</h2>
+    <ul class="space-y-2">
+      {% for g in c.gaps %}
+      <li class="flex gap-2 text-sm text-zinc-300"><span class="text-amber">&rarr;</span> {{ g }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</div>
+
+<!-- Trilha -->
+{% if c.trilha %}
+<section class="mb-6 rise rise-3">
+  <h2 class="font-display font-semibold text-white text-xl mb-4">Trilha de aprendizado</h2>
+  <div class="space-y-3">
+    {% for etapa in c.trilha %}
+    <div class="bg-panel border border-line rounded-xl p-5 flex gap-4">
+      <div class="font-display font-extrabold text-2xl text-amber/80 leading-none w-8 shrink-0">{{ etapa.etapa }}</div>
+      <div class="flex-1">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <h3 class="font-semibold text-white">{{ etapa.titulo }}</h3>
+          {% if etapa.duracao_estimada %}
+          <span class="font-mono text-xs text-zinc-400 bg-ink border border-line rounded px-2 py-0.5">{{ etapa.duracao_estimada }}</span>
+          {% endif %}
+        </div>
+        <p class="text-sm text-zinc-400 mt-1">{{ etapa.descricao }}</p>
+        {% if etapa.recursos %}
+        <div class="flex flex-wrap gap-2 mt-3">
+          {% for r in etapa.recursos %}
+          <span class="text-xs text-zinc-300 bg-ink border border-line rounded-full px-3 py-1">{{ r }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Certificacoes -->
+{% if c.certificacoes %}
+<section class="mb-6 rise rise-3">
+  <h2 class="font-display font-semibold text-white text-xl mb-4">Certificacoes recomendadas</h2>
+  <div class="grid md:grid-cols-2 gap-3">
+    {% for cert in c.certificacoes %}
+    {% set cor = 'text-red-300 border-red-500/40' if cert.prioridade == 'alta' else ('text-amber border-amber/40' if cert.prioridade == 'media' else 'text-zinc-400 border-line') %}
+    <div class="bg-panel border border-line rounded-xl p-5">
+      <div class="flex items-start justify-between gap-2">
+        <h3 class="font-semibold text-white">{{ cert.nome }}</h3>
+        <span class="text-[10px] uppercase font-mono border rounded px-2 py-0.5 {{ cor }}">{{ cert.prioridade }}</span>
+      </div>
+      <p class="text-sm text-zinc-400 mt-2">{{ cert.motivo }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<div class="grid md:grid-cols-2 gap-6">
+  <!-- Cronograma -->
+  {% if c.cronograma %}
+  <section class="bg-panel border border-line rounded-xl p-6 rise rise-3">
+    <h2 class="font-display font-semibold text-white mb-3">Cronograma</h2>
+    <div class="space-y-3">
+      {% for item in c.cronograma %}
+      <div class="border-l-2 border-amber/50 pl-3">
+        <div class="font-mono text-xs text-amber">{{ item.periodo }}</div>
+        <p class="text-sm text-zinc-300">{{ item.foco }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Proximos passos -->
+  {% if c.proximos_passos %}
+  <section class="bg-panel border border-line rounded-xl p-6 rise rise-3">
+    <h2 class="font-display font-semibold text-white mb-3">Proximos passos</h2>
+    <ul class="space-y-2">
+      {% for passo in c.proximos_passos %}
+      <li class="flex gap-2 text-sm text-zinc-300"><span class="text-amber">&#9654;</span> {{ passo }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

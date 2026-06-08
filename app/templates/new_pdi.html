@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Novo PDI - MentorPDI{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto rise rise-1">
+  <h1 class="font-display font-bold text-2xl text-white mb-1">Gerar novo PDI</h1>
+  <p class="text-zinc-400 text-sm mb-6">Quanto mais detalhe, melhor o plano que a IA vai montar.</p>
+
+  {% if erro %}
+  <div class="bg-red-500/10 border border-red-500/40 text-red-300 text-sm rounded-md px-4 py-2 mb-4">{{ erro }}</div>
+  {% endif %}
+
+  <form method="post" action="/pdi/novo" id="pdiForm" class="bg-panel border border-line rounded-xl p-6 space-y-5">
+    <div>
+      <label class="block text-sm text-zinc-400 mb-1">Cargo atual</label>
+      <input name="cargo_atual" required value="{{ form.cargo_atual if form else '' }}"
+        placeholder="Ex: Analista de Suporte Junior"
+        class="w-full bg-ink border border-line rounded-md px-3 py-2 text-white focus:border-amber focus:outline-none">
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm text-zinc-400 mb-1">Nivel de experiencia</label>
+        <select name="nivel_experiencia" class="w-full bg-ink border border-line rounded-md px-3 py-2 text-white focus:border-amber focus:outline-none">
+          <option>Iniciante</option>
+          <option selected>Intermediario</option>
+          <option>Avancado</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm text-zinc-400 mb-1">Horas de estudo por semana</label>
+        <input name="horas_semanais" type="number" min="1" max="60" required value="{{ form.horas_semanais if form else 8 }}"
+          class="w-full bg-ink border border-line rounded-md px-3 py-2 text-white focus:border-amber focus:outline-none">
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm text-zinc-400 mb-1">Area de interesse / para onde quer ir</label>
+      <input name="area_interesse" required value="{{ form.area_interesse if form else '' }}"
+        placeholder="Ex: Engenharia de DevOps / Cloud"
+        class="w-full bg-ink border border-line rounded-md px-3 py-2 text-white focus:border-amber focus:outline-none">
+    </div>
+
+    <div>
+      <label class="block text-sm text-zinc-400 mb-1">Objetivo principal</label>
+      <input name="objetivo" required value="{{ form.objetivo if form else '' }}"
+        placeholder="Ex: Me tornar engenheiro de DevOps em 1 ano"
+        class="w-full bg-ink border border-line rounded-md px-3 py-2 text-white focus:border-amber focus:outline-none">
+    </div>
+
+    <div>
+      <label class="block text-sm text-zinc-400 mb-1">Tecnologias que voce ja conhece</label>
+      <textarea name="tecnologias" required rows="3"
+        placeholder="Ex: Linux, redes basicas, Windows Server, um pouco de Python"
+        class="w-full bg-ink border border-line rounded-md px-3 py-2 text-white focus:border-amber focus:outline-none">{{ form.tecnologias if form else '' }}</textarea>
+    </div>
+
+    <button type="submit" id="submitBtn"
+      class="w-full bg-amber text-ink font-semibold py-3 rounded-md hover:bg-amber-soft transition flex items-center justify-center gap-2">
+      <span id="btnLabel">Gerar PDI com IA</span>
+    </button>
+    <p id="loadingMsg" class="hidden text-center text-sm text-zinc-400">A IA esta montando seu plano, aguarde alguns segundos...</p>
+  </form>
+</div>
+
+<script>
+  document.getElementById('pdiForm').addEventListener('submit', function () {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.classList.add('opacity-70');
+    document.getElementById('btnLabel').textContent = 'Gerando...';
+    btn.insertAdjacentHTML('afterbegin', '<span class="spinner"></span>');
+    document.getElementById('loadingMsg').classList.remove('hidden');
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Criar conta - MentorPDI{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto mt-8 rise rise-1">
+  <h1 class="font-display font-bold text-2xl text-white mb-1">Criar conta</h1>
+  <p class="text-zinc-400 text-sm mb-6">Comece a planejar sua evolucao na area.</p>
+
+  {% if erro %}
+  <div class="bg-red-500/10 border border-red-500/40 text-red-300 text-sm rounded-md px-4 py-2 mb-4">{{ erro }}</div>
+  {% endif %}
+
+  <form method="post" action="/register" class="bg-panel border border-line rounded-xl p-6 space-y-4">
+    <div>
+      <label class="block text-sm text-zinc-400 mb-1">Usuario</label>
+      <input name="username" required class="w-full bg-ink border border-line rounded-md px-3 py-2 text-white focus:border-amber focus:outline-none">
+    </div>
+    <div>
+      <label class="block text-sm text-zinc-400 mb-1">E-mail</label>
+      <input name="email" type="email" required class="w-full bg-ink border border-line rounded-md px-3 py-2 text-white focus:border-amber focus:outline-none">
+    </div>
+    <div>
+      <label class="block text-sm text-zinc-400 mb-1">Senha</label>
+      <input name="password" type="password" required class="w-full bg-ink border border-line rounded-md px-3 py-2 text-white focus:border-amber focus:outline-none">
+    </div>
+    <button class="w-full bg-amber text-ink font-semibold py-2.5 rounded-md hover:bg-amber-soft transition">Criar conta</button>
+  </form>
+
+  <p class="text-center text-sm text-zinc-500 mt-4">
+    Ja tem conta? <a href="/login" class="text-amber hover:underline">Entrar</a>
+  </p>
+</div>
+{% endblock %}
