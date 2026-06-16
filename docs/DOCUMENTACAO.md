@@ -33,18 +33,19 @@ ao longo do tempo.
 
 ## 3. Tecnologias utilizadas
 
-| Camada | Tecnologia |
-|---|---|
-| Linguagem | Python 3.11+ |
-| Framework web | FastAPI |
-| Servidor ASGI | Uvicorn |
-| ORM / Modelos | SQLModel (SQLAlchemy + Pydantic) |
-| Banco de dados | SQLite (troca para PostgreSQL via variável de ambiente) |
-| Templates | Jinja2 |
-| Estilo | Tailwind CSS (via CDN) + CSS próprio |
-| Sessão/Auth | Starlette SessionMiddleware + bcrypt |
-| IA | API do Google Gemini — desacoplada, troca fácil de provider |
-| Configuração | pydantic-settings (.env) |
+| Camada         | Tecnologia                                                  |
+| -------------- | ----------------------------------------------------------- |
+| Linguagem      | Python 3.11+                                                |
+| Framework web  | FastAPI                                                     |
+| Servidor ASGI  | Uvicorn                                                     |
+| ORM / Modelos  | SQLModel (SQLAlchemy + Pydantic)                            |
+| Banco de dados | SQLite (troca para PostgreSQL via variável de ambiente)     |
+| Templates      | Jinja2                                                      |
+| Estilo         | Tailwind CSS (via CDN) + CSS próprio                        |
+| Sessão/Auth    | Starlette SessionMiddleware + bcrypt                        |
+| IA             | API do Google Gemini — desacoplada, troca fácil de provider |
+| Configuração   | pydantic-settings (.env)                                    |
+| Implantação    | Docker + Docker Compose (em VM Debian sobre Proxmox VE)     |
 
 ## 4. Funcionamento da IA
 
@@ -65,35 +66,43 @@ mesmos campos (diagnóstico, trilha, certificações, etc.), permitindo renderiz
 rica e consistente em vez de um texto solto.
 
 **Troca de provider:** o módulo usa um dicionário de dispatch (`_PROVIDERS`). Para usar
-OpenAI ou Gemini, basta implementar uma função `_call_<provider>` e registrá-la. A escolha
-é feita pela variável `AI_PROVIDER` no `.env`.
+outro provedor (como OpenAI ou Claude), basta implementar uma função `_call_<provider>`
+e registrá-la. A escolha é feita pela variável `AI_PROVIDER` no `.env`.
 
 ## 5. Arquitetura do sistema
 
-```
-Navegador
-   │  (HTML via Jinja2 + Tailwind)
-   ▼
-FastAPI (app/main.py)
-   ├── SessionMiddleware ......... identifica o usuário logado (cookie assinado)
-   ├── routers/auth_routes.py .... cadastro, login, logout
-   └── routers/pdi_routes.py ..... painel, gerar PDI, ver PDI
-            │
-            ├── ai_service.py ..... chamada à IA (Google Gemini)
-            │        │
-            │        ▼
-            │   API externa de IA
-            │
-            └── database.py / models.py (SQLModel)
-                     │
-                     ▼
-                 SQLite (mentorpdi.db)
-```
+A figura abaixo apresenta a arquitetura do sistema em produção, do cliente até a API de
+IA externa.
+
+![Arquitetura do Sistema — MentorPDI](arquitetura_mentorpdi.png)
+
+A aplicação segue uma arquitetura web em camadas, empacotada em contêiner e implantada em
+uma máquina virtual:
+
+- **Cliente:** o usuário acessa a aplicação pelo navegador, que se comunica com o servidor
+  via HTTP (porta 8000).
+- **Infraestrutura:** a aplicação roda dentro de um contêiner Docker (`mentorpdi`)
+  hospedado em uma VM Debian 12 sobre o Proxmox VE, acessível pela rede privada.
+- **Aplicação (FastAPI):** concentra a lógica do sistema, dividida por responsabilidade:
+  - *Interface Web* — páginas renderizadas com Jinja2 + Tailwind;
+  - *Cadastro / Login* — identificação do usuário, com sessão e senha protegida por bcrypt;
+  - *Rotas HTTP* — endpoints de autenticação e de PDI;
+  - *Serviço de IA* (`ai_service.py`) — responsável por montar o prompt e chamar a IA.
+- **Persistência:** os dados (usuários e histórico de PDIs) são gravados em um banco
+  SQLite que reside em um volume Docker persistente (`/data`), sobrevivendo a reinícios e
+  reconstruções do contêiner.
+- **IA externa:** o serviço de IA chama a API do Google Gemini (modelo `gemini-2.5-flash`)
+  via HTTPS para gerar o conteúdo do PDI.
+
+**Fluxo de uma requisição:** o usuário acessa a interface no navegador → a aplicação
+FastAPI autentica a sessão e trata a rota → ao gerar um PDI, o serviço de IA envia o
+perfil à API do Gemini e recebe o plano em JSON → o resultado é salvo no banco (volume
+persistente) e exibido na tela. As consultas ao histórico leem diretamente do banco.
 
 Organização das pastas:
 
 ```
-mentor-pdi/
+PDI_application/
 ├── app/
 │   ├── main.py            # aplicação FastAPI e rota inicial
 │   ├── config.py          # configuração via .env
@@ -105,7 +114,9 @@ mentor-pdi/
 │   ├── routers/           # rotas separadas por responsabilidade
 │   ├── templates/         # páginas HTML
 │   └── static/            # CSS
-├── docs/                  # esta documentação
+├── docs/                  # documentação e diagramas
+├── Dockerfile             # imagem da aplicação
+├── docker-compose.yml     # orquestração + volume persistente
 ├── requirements.txt
 ├── .env.example
 └── README.md
@@ -142,6 +153,9 @@ cada PDI registra exatamente o que foi pedido e o que a IA respondeu.
   modelo sem perder informação.
 - **Desacoplamento da IA:** isolar a integração num único módulo para que trocar de
   provider (Gemini, Claude) não exija mexer no restante do sistema.
+- **Implantação com persistência:** ao subir a aplicação em contêiner, foi necessário
+  apontar o banco para um volume Docker (`/data`) para que os dados não se perdessem a
+  cada reconstrução da imagem.
 
 ## 8. Conclusão
 
