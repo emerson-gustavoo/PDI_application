@@ -112,7 +112,15 @@ def _call_anthropic(user_prompt: str) -> str:
     return "".join(block.text for block in message.content if block.type == "text")
 
 
+def _is_overloaded(err: Exception) -> bool:
+    """Detecta erro transitorio do Gemini (sobrecarga / limite de taxa)."""
+    msg = str(err)
+    return any(t in msg for t in ("503", "UNAVAILABLE", "429", "RESOURCE_EXHAUSTED")) \
+        or "overloaded" in msg.lower()
+
+
 def _call_gemini(user_prompt: str) -> str:
+    import time
     from google import genai
     from google.genai import types
 
@@ -122,16 +130,40 @@ def _call_gemini(user_prompt: str) -> str:
         )
 
     client = genai.Client(api_key=settings.gemini_api_key)
-    response = client.models.generate_content(
-        model=settings.gemini_model,
-        contents=user_prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            # Forca a resposta a sair em JSON puro (sem cercas de markdown)
-            response_mime_type="application/json",
-        ),
+    config = types.GenerateContentConfig(
+        system_instruction=SYSTEM_PROMPT,
+        # Forca a resposta a sair em JSON puro (sem cercas de markdown)
+        response_mime_type="application/json",
     )
-    return response.text
+
+    # Tenta o modelo configurado e, se estiver sobrecarregado, cai para o
+    # flash-lite (mais leve, costuma estar menos congestionado no free tier).
+    modelos = []
+    for m in (settings.gemini_model, "gemini-2.5-flash-lite"):
+        if m not in modelos:
+            modelos.append(m)
+
+    last_err = None
+    for modelo in modelos:
+        for tentativa in range(2):  # ate 2 tentativas por modelo
+            try:
+                response = client.models.generate_content(
+                    model=modelo, contents=user_prompt, config=config
+                )
+                return response.text
+            except Exception as exc:
+                last_err = exc
+                if _is_overloaded(exc):
+                    time.sleep(1.5 * (tentativa + 1))  # espera e tenta de novo
+                    continue
+                break  # erro nao-transitorio: pula para o proximo modelo
+
+    # Esgotou as tentativas
+    if last_err and _is_overloaded(last_err):
+        raise RuntimeError(
+            "A IA esta sobrecarregada no momento. Aguarde alguns segundos e tente novamente."
+        )
+    raise last_err if last_err else RuntimeError("Falha desconhecida ao chamar a IA.")
 
 
 def _call_mock(user_prompt: str) -> str:
