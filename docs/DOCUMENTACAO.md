@@ -133,13 +133,25 @@ cada PDI registra exatamente o que foi pedido e o que a IA respondeu.
 
 ## 6. Prints da aplicação
 
-> Substitua pelos prints reais tirados na sua máquina (sugestão de telas a capturar):
+**Tela inicial (landing):** apresentação da proposta e chamada para gerar o PDI.
 
-- Tela inicial (landing).
-- Tela de cadastro / login.
-- Formulário de geração de PDI.
-- PDI gerado (diagnóstico, trilha, certificações, cronograma).
-- Painel com o histórico de PDIs.
+![Tela inicial](mentor_pdi00.png)
+
+**Cadastro de usuário:** criação de conta com usuário, e-mail e senha (senha protegida por bcrypt).
+
+![Tela de cadastro](mentor_pdi01.png)
+
+**Formulário de geração do PDI:** o usuário informa o perfil — cargo atual, nível de experiência, área de interesse, objetivo, tecnologias que já conhece e horas de estudo por semana.
+
+![Formulário de novo PDI](mentor_pdi02.png)
+
+**PDI gerado pela IA — parte 1:** diagnóstico do perfil, pontos fortes, lacunas a desenvolver e início da trilha de aprendizado.
+
+![PDI gerado: diagnostico e trilha](mentor_pdi03.png)
+
+**PDI gerado pela IA — parte 2:** continuação da trilha, certificações recomendadas (com prioridade), cronograma sugerido e próximos passos.
+
+![PDI gerado: certificacoes e cronograma](mentor_pdi04.png)
 
 ## 7. Principais desafios encontrados
 
